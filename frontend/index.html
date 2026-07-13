@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SellifyX Internal</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="appbar">
+        <div class="brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">SellifyX Internal</p>
+            <h1>Product Studio</h1>
+          </div>
+        </div>
+        <button class="icon-button" id="refreshButton" type="button" title="Tải lại danh sách" aria-label="Tải lại danh sách">
+          <span aria-hidden="true">↻</span>
+        </button>
+      </header>
+
+      <div class="workspace-grid">
+        <!-- COLUMN 1 — product form -->
+        <section class="panel form-panel">
+          <div class="panel-title">
+            <h2>Thông tin sản phẩm</h2>
+            <span class="muted compact" id="imageCount">0 ảnh</span>
+          </div>
+
+          <form class="form-body" id="projectForm">
+            <div class="form-scroll">
+            <div class="field-grid">
+              <label class="field">
+                <span>SKU <small class="req">*</small></span>
+                <input id="sku" data-product-field="sku" autocomplete="off" placeholder="VD: BCH-001" required>
+              </label>
+              <label class="field">
+                <span>Danh mục <small class="muted">(tùy chọn)</small></span>
+                <input id="category" data-product-field="category" autocomplete="off" placeholder="Bỏ trống cũng được">
+              </label>
+              <label class="field">
+                <span>Màu sắc</span>
+                <input data-product-field="colors" autocomplete="off" placeholder="VD: cream, gray legs">
+              </label>
+              <label class="field">
+                <span>Số lượng ảnh</span>
+                <input data-product-field="targetImageCount" autocomplete="off" placeholder="VD: 5 hoặc 15">
+              </label>
+              <label class="field">
+                <span>Chế độ tạo ảnh</span>
+                <select id="generationMode">
+                  <option value="ai" selected>AI thật</option>
+                  <option value="mock">Mock test</option>
+                </select>
+              </label>
+              <label class="field inline-check">
+                <input id="needsCta" type="checkbox" data-product-field="needsCta" value="YES">
+                <span>Cần ảnh CTA</span>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Mô tả sản phẩm</span>
+              <textarea data-product-field="description" rows="4" placeholder="Dán thông tin sản phẩm, thông số, điểm cần nhấn mạnh. Có thể để trống nếu ảnh đã có đủ thông tin."></textarea>
+            </label>
+
+            <section class="image-manager">
+              <div class="panel-header">
+                <h3>Ảnh tham chiếu</h3>
+              </div>
+              <label class="file-drop" for="images">
+                <input id="images" name="images" type="file" accept="image/*" multiple>
+                <span>Thêm một hoặc nhiều ảnh sản phẩm</span>
+                <small id="fileSummary">Chưa có ảnh mới</small>
+              </label>
+              <div class="pending-images" id="pendingImages"></div>
+              <div class="image-list" id="existingImages"></div>
+            </section>
+            </div>
+
+            <div class="form-actions sticky-actions">
+              <button class="secondary-button" id="newProjectButton" type="button">SKU mới</button>
+              <button class="secondary-button" id="saveOnlyButton" type="button">Lưu dữ liệu</button>
+              <button class="secondary-button" id="viewPlanButton" type="button" hidden>Xem kế hoạch</button>
+              <button class="primary-button" type="submit">Lưu &amp; Tạo kế hoạch</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- COLUMN 2 — product list -->
+        <aside class="panel projects-panel">
+          <div class="panel-title">
+            <h2>Sản phẩm</h2>
+            <span class="pill" id="projectCount">0</span>
+          </div>
+          <div class="project-list scroll" id="projectList"></div>
+        </aside>
+
+        <!-- COLUMN 3 — generated images + status -->
+        <aside class="panel results-rail">
+          <div class="rail-scroll">
+            <section class="rail-section">
+              <div class="panel-header">
+                <h2>Ảnh đã generate</h2>
+              </div>
+              <div class="generated-list" id="generatedImages"></div>
+              <label class="field">
+                <span>Feedback sửa ảnh</span>
+                <textarea id="repairFeedback" rows="3" placeholder="VD: ảnh 2 sai form sản phẩm, ảnh 3 text bị rối..."></textarea>
+              </label>
+              <label class="field">
+                <span>Đánh giá ảnh đã chọn</span>
+                <select id="feedbackRating">
+                  <option value="needs_fix">Chưa đạt / cần sửa</option>
+                  <option value="liked">Đánh giá tốt</option>
+                  <option value="failed">Ảnh lỗi</option>
+                </select>
+              </label>
+              <div class="form-actions">
+                <button class="secondary-button" id="saveFeedbackButton" type="button">Lưu góp ý</button>
+                <button class="primary-button" id="repairButton" type="button">Sửa ảnh đã chọn</button>
+              </div>
+            </section>
+
+            <section class="rail-section">
+              <div class="panel-header"><h3>Trạng thái</h3></div>
+              <div id="statusBox" class="status-box">Sẵn sàng nhận SKU mới.</div>
+            </section>
+
+            <details class="rail-section rail-log">
+              <summary>Nhật ký</summary>
+              <div class="chat-log" id="chatLog">
+                <article class="message assistant">
+                  <strong>SellifyX</strong>
+                  <p>Nhập SKU + ảnh sản phẩm rồi bấm "Lưu &amp; Tạo kế hoạch". Xem lại/chỉnh sửa layout trước khi tạo ảnh. Danh mục tùy chọn.</p>
+                </article>
+              </div>
+              <div id="progressLog" class="progress-log">Chưa có job nào đang chạy.</div>
+            </details>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <div class="activity-overlay" id="activityOverlay" hidden>
+      <div class="activity-modal" role="dialog" aria-modal="true" aria-labelledby="activityTitle">
+        <header class="activity-head">
+          <div class="activity-head-main">
+            <span class="activity-spinner" id="activitySpinner" aria-hidden="true"></span>
+            <div>
+              <h2 id="activityTitle">Đang xử lý…</h2>
+              <p class="muted compact" id="activitySubtitle">SellifyX đang chạy pipeline.</p>
+            </div>
+          </div>
+          <span class="badge run" id="activityBadge">RUNNING</span>
+        </header>
+        <div class="activity-body">
+          <div class="activity-steps" id="activitySteps"></div>
+          <div class="activity-timeline">
+            <h3>Nhật ký chi tiết</h3>
+            <div class="activity-events" id="activityEvents"></div>
+          </div>
+        </div>
+        <footer class="activity-foot">
+          <button class="secondary-button" id="activityBackgroundButton" type="button">Chạy nền</button>
+          <button class="primary-button" id="activityCloseButton" type="button" disabled>Đóng</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="activity-overlay" id="planOverlay" hidden>
+      <div class="activity-modal plan-modal" role="dialog" aria-modal="true" aria-labelledby="planTitle">
+        <header class="activity-head">
+          <div class="activity-head-main">
+            <div>
+              <h2 id="planTitle">Bản kế hoạch</h2>
+              <p class="muted compact" id="planSubtitle">Xem trước layout &amp; prompt trước khi tạo ảnh.</p>
+            </div>
+          </div>
+          <span class="badge ok">PLAN READY</span>
+        </header>
+        <div class="plan-body" id="planBody"></div>
+        <footer class="activity-foot">
+          <button class="secondary-button" id="planCloseButton" type="button">Đóng</button>
+          <button class="secondary-button" id="planSaveButton" type="button">Lưu chỉnh sửa</button>
+          <button class="primary-button" id="planGenerateButton" type="button">Tạo ảnh</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="activity-overlay" id="resultsOverlay" hidden>
+      <div class="activity-modal plan-modal" role="dialog" aria-modal="true" aria-labelledby="resultsTitle">
+        <header class="activity-head">
+          <div class="activity-head-main">
+            <div>
+              <h2 id="resultsTitle">Ảnh đã tạo — review</h2>
+              <p class="muted compact">Chọn ảnh chưa ưng, nhập góp ý rồi bấm "Tạo lại". Bạn quyết định, không có QC AI tự lặp.</p>
+            </div>
+          </div>
+          <span class="badge ok" id="resultsCount">0 ảnh</span>
+        </header>
+        <div class="plan-body" id="resultsBody"></div>
+        <div class="results-feedback">
+          <label class="field">
+            <span>Góp ý cho ảnh đã chọn</span>
+            <textarea id="resultsFeedback" rows="2" placeholder="VD: ảnh 3 sản phẩm bị nghiêng, ảnh 7 nền tối quá — làm sáng hơn..."></textarea>
+          </label>
+        </div>
+        <footer class="activity-foot">
+          <button class="secondary-button" id="resultsCloseButton" type="button">Đóng</button>
+          <button class="primary-button" id="resultsRegenButton" type="button">Tạo lại ảnh đã chọn</button>
+        </footer>
+      </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Local AI/editor configuration
+.claude/
+.agents/
+.vscode/
+.idea/
+
+# Generated experiment outputs
+/experiments/
+
+# Internal documentation
+/SellifyX Docs/
+
+# Build and cache
+dist/
+build/
+coverage/
+.cache/
+tmp/
+temp/
+
+# OS and logs
+.DS_Store
+Thumbs.db
+*.log
